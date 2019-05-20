@@ -29,6 +29,10 @@ public:
 	glm::ivec3 N_cells_side;
 	std::vector<int> next;
 	std::vector<int> head;
+
+protected:
+	void _parse_input(char *filename);
+	void _init_cells();
 };
 
 #endif /* SRC_SYSTEM_H_ */

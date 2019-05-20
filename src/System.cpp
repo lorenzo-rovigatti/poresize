@@ -14,6 +14,17 @@
 #include <fstream>
 
 System::System(char *filename) {
+	_parse_input(filename);
+	_init_cells();
+
+	rcut = 1.0;
+}
+
+System::~System() {
+
+}
+
+void System::_parse_input(char *filename) {
 	std::ifstream input(filename);
 
 	if(!input.good()) {
@@ -56,7 +67,9 @@ System::System(char *filename) {
 	input.close();
 }
 
-System::~System() {
-
+void System::_init_cells() {
+	N_cells_side = glm::floor(box / rcut);
+	int N_cells = N_cells_side[0] * N_cells_side[1] * N_cells_side[3];
+	next.resize(N_cells);
+	head.resize(N_cells);
 }
-
