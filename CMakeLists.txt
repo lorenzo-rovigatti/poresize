@@ -4,8 +4,11 @@ PROJECT(poresize)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src/extern )
+
 SET(ps_SOURCES
 	src/main.cpp
+	src/System.cpp
 )
 
 ADD_EXECUTABLE(poresize ${ps_SOURCES})
