@@ -72,4 +72,8 @@ void System::_init_cells() {
 	int N_cells = N_cells_side[0] * N_cells_side[1] * N_cells_side[3];
 	next.resize(N_cells);
 	head.resize(N_cells);
+
+	for(unsigned int i = 0; i < particles.size(); i++) {
+
+	}
 }
