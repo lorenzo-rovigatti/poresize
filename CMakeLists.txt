@@ -32,3 +32,4 @@ SET(ps_SOURCES
 )
 
 ADD_EXECUTABLE(poresize ${ps_SOURCES})
+TARGET_LINK_LIBRARIES(poresize -lnlopt)

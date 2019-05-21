@@ -20,7 +20,7 @@ using vector_vec3 = std::vector<vec3>;
 
 class System {
 public:
-	System(char *filename);
+	System(char *filename, double rc);
 	virtual ~System();
 
 	int get_cell_index(const vec3 &pos) const;

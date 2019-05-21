@@ -16,8 +16,8 @@
 #include <iostream>
 #include <fstream>
 
-System::System(char *filename) :
-				r_cut(1.0) {
+System::System(char *filename, double rc) :
+				r_cut(rc) {
 	_parse_input(filename);
 	_init_cells();
 }
