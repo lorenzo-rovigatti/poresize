@@ -13,13 +13,13 @@ Download the poresize archive or clone it via `git`.
 
 The code can be compiled with the following commands:
 
-	cd poresize		# enter the poresize folder
-	mkdir build		# create a new build folder. It is good practice to compile out-of-source
+	cd poresize       # enter the poresize folder
+	mkdir build       # create a new build folder. It is good practice to compile out-of-source
 	cd build
-	cmake ..			# here you can specify additional options, see next section
-	make -j4			# compile baggianalysis. The -jX make option makes it compile the code in parallel by using X threads.
+	cmake ..          # here you can specify additional options, see next section
+	make -j4          # compile poresize. The -jX make option makes it compile the code in parallel by using X threads.
 	
-The poresize observable will be placed in the `bin` folder.
+The poresize executable will be placed in the `bin` folder.
 
 ## cmake options
 
