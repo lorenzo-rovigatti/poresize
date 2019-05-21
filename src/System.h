@@ -15,6 +15,7 @@
 #include <vector>
 
 using vec3 = glm::dvec3;
+using ivec3 = glm::ivec3;
 using vector_vec3 = std::vector<vec3>;
 
 class System {
@@ -22,13 +23,18 @@ public:
 	System(char *filename);
 	virtual ~System();
 
+	int get_cell_index(const vec3 &pos) const;
+	glm::ivec3 get_cell(const vec3 &pos) const;
+
 	vector_vec3 particles;
 	vec3 box;
 
-	double rcut;
+	double r_cut;
 	glm::ivec3 N_cells_side;
 	std::vector<int> next;
-	std::vector<int> head;
+	std::vector<int> heads;
+//	std::vector<glm::ivec3> cell_shifts;
+	std::vector<std::vector<ivec3>> cell_shifts;
 
 protected:
 	void _parse_input(char *filename);
