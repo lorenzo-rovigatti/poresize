@@ -138,8 +138,8 @@ ivec3 System::get_cell(const vec3 &pos) const {
 
 void System::_init_cells() {
 	N_cells_side = glm::floor(box / r_cut);
-	// everything becomes easier if the number of cells per side is odd
 	for(int i = 0; i < 3; i++) {
+		// everything becomes easier if the number of cells per side is odd
 		if((N_cells_side[i] % 2) == 0) {
 			N_cells_side[i]--;
 		}
@@ -159,7 +159,7 @@ void System::_init_cells() {
 		heads[cell_idx] = i;
 	}
 
-	// here we generate lists of all possible shifts according to their order (i.e. distance from the central cell)
+	// here we generate lists of all possible shifts according to their order (the shell around the central cell they belong to)
 	int max_shift = (glm::compMax(N_cells_side) - 1) / 2;
 	cell_shifts.resize(max_shift);
 	ivec3 shift;

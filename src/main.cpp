@@ -93,7 +93,7 @@ double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) 
 	data.position = (vec3 *) &position;
 
 	opt.remove_inequality_constraints();
-	opt.add_inequality_constraint(constraint, &data, 1e-8);
+	opt.add_inequality_constraint(constraint, &data, 1e-6);
 
 	std::vector<double> starting_position({position[0], position[1], position[2]});
 	double maximum_radius;
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	std::random_device dev;
-	// deterministic runs for debugging purposes
+	// deterministic runs for debugging purposes, use dev() to "randomly" initialise the rng
 	std::mt19937 rng(12345);
 	std::uniform_real_distribution<double> uniform(0., 1.);
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 	opt.set_lower_bounds(lower_bounds);
 	opt.set_upper_bounds(upper_bounds);
 	opt.set_max_objective(function_to_maximise, (void *) &syst);
-	opt.set_xtol_rel(1e-8);
+	opt.set_xtol_rel(1e-4);
 
 	CumulativeHistogram result(atoi(argv[4]));
 
@@ -154,9 +154,13 @@ int main(int argc, char *argv[]) {
 			std::cerr << i << " steps completed" << std::endl;
 		}
 		vec3 random_position(uniform(rng) * syst.box[0], uniform(rng) * syst.box[1], uniform(rng) * syst.box[2]);
-		double maximum_R = find_maximum_radius(syst, opt, random_position);
-		if(maximum_R > 0.) {
-			result.add_point(maximum_R);
+
+		// if the random position is inside one of the particles we disregard it
+		if(radius(syst, random_position) > 0.) {
+			double maximum_R = find_maximum_radius(syst, opt, random_position);
+			if(maximum_R > 0.) {
+				result.add_point(maximum_R);
+			}
 		}
 	}
 
