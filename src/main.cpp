@@ -6,6 +6,7 @@
  */
 
 #include "System.h"
+#include "CumulativeHistogram.h"
 
 #include <nlopt.hpp>
 
@@ -44,6 +45,10 @@ double radius(System &syst, const vec3 &centre) {
 				// periodic boundary conditions
 				distance -= glm::round(distance / syst.box) * syst.box;
 				double distance_sqr = glm::dot(distance, distance);
+				// if the point is inside one of the spheres we just return
+				if(distance_sqr < syst.particle_radius_sqr) {
+					return 0.;
+				}
 				if(R_sqr < 0. || distance_sqr < R_sqr) {
 					R_sqr = distance_sqr;
 				}
@@ -53,7 +58,7 @@ double radius(System &syst, const vec3 &centre) {
 		}
 	}
 
-	return sqrt(R_sqr);
+	return sqrt(R_sqr) - syst.particle_radius;
 }
 
 // this is the function we want to maximise
@@ -72,7 +77,7 @@ double constraint(unsigned n, const double *x, double *grad, void *data) {
 	constraint_data *d = (constraint_data *) data;
 	vec3 centre(x[0], x[1], x[2]);
 
-	double R = radius(*(d->syst), *(d->position));
+	double R = radius(*(d->syst), centre);
 	vec3 distance = centre - *(d->position);
 	// periodic boundary conditions
 	distance -= glm::round(distance / d->syst->box) * d->syst->box;
@@ -105,13 +110,14 @@ double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) 
 }
 
 int main(int argc, char *argv[]) {
-	if(argc < 5) {
-		std::cerr << "Usage is " << argv[0] << " input_file input_file_type=oxDNA|LAMMPS r_cut steps" << std::endl;
+	if(argc < 6) {
+		std::cerr << "Usage is " << argv[0] << " input_file input_file_type=oxDNA|LAMMPS r_cut histogram_bins steps" << std::endl;
 		exit(1);
 	}
 
 	std::random_device dev;
-	std::mt19937 rng(dev());
+	// deterministic runs for debugging purposes
+	std::mt19937 rng(12345);
 	std::uniform_real_distribution<double> uniform(0., 1.);
 
 	std::string input_type(argv[2]);
@@ -140,14 +146,21 @@ int main(int argc, char *argv[]) {
 	opt.set_max_objective(function_to_maximise, (void *) &syst);
 	opt.set_xtol_rel(1e-8);
 
-	long long int steps = atol(argv[4]);
+	CumulativeHistogram result(atoi(argv[4]));
+
+	long long int steps = atol(argv[5]);
 	for(int i = 0; i < steps; i++) {
 		if(i > 0 && (i % (steps / 10) == 0)) {
 			std::cerr << i << " steps completed" << std::endl;
 		}
 		vec3 random_position(uniform(rng) * syst.box[0], uniform(rng) * syst.box[1], uniform(rng) * syst.box[2]);
-		std::cout << find_maximum_radius(syst, opt, random_position) << std::endl;
+		double maximum_R = find_maximum_radius(syst, opt, random_position);
+		if(maximum_R > 0.) {
+			result.add_point(maximum_R);
+		}
 	}
+
+	result.print_out();
 
 	return 0;
 }

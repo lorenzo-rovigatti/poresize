@@ -32,6 +32,8 @@ public:
 	vector_vec3 particles;
 	vec3 box;
 
+	double particle_radius;
+	double particle_radius_sqr;
 	double r_cut;
 	glm::ivec3 N_cells_side;
 	std::vector<int> next;

@@ -29,6 +29,7 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src/extern )
 SET(ps_SOURCES
 	src/main.cpp
 	src/System.cpp
+	src/CumulativeHistogram.cpp
 )
 
 ADD_EXECUTABLE(poresize ${ps_SOURCES})

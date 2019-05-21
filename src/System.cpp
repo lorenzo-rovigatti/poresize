@@ -17,7 +17,10 @@
 #include <fstream>
 
 System::System(double rc) :
+				particle_radius(0.5),
 				r_cut(rc) {
+
+	particle_radius_sqr = particle_radius * particle_radius;
 }
 
 System::~System() {
@@ -130,11 +133,7 @@ int System::get_cell_index(const vec3 &pos) const {
 
 ivec3 System::get_cell(const vec3 &pos) const {
 	int cell_index = get_cell_index(pos);
-	return ivec3(
-			cell_index % N_cells_side[0],
-			(cell_index / N_cells_side[0]) % N_cells_side[1],
-			cell_index / (N_cells_side[0] * N_cells_side[1])
-	);
+	return ivec3(cell_index % N_cells_side[0], (cell_index / N_cells_side[0]) % N_cells_side[1], cell_index / (N_cells_side[0] * N_cells_side[1]));
 }
 
 void System::_init_cells() {
@@ -178,7 +177,7 @@ void System::_init_cells() {
 	}
 
 	std::cerr << "Maximum shift order: " << max_shift << ", number of shifts per order:";
-	for(auto &shift: cell_shifts) {
+	for(auto &shift : cell_shifts) {
 		std::cerr << " " << shift.size();
 	}
 	std::cerr << std::endl;
