@@ -111,7 +111,7 @@ double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) 
 
 int main(int argc, char *argv[]) {
 	if(argc < 6) {
-		std::cerr << "Usage is " << argv[0] << " input_file input_file_type=oxDNA|LAMMPS r_cut histogram_bins steps" << std::endl;
+		std::cerr << "Usage is " << argv[0] << " input_file input_file_type=oxDNA|LAMMPS r_cut histogram_bin_size steps" << std::endl;
 		exit(1);
 	}
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 	opt.set_max_objective(function_to_maximise, (void *) &syst);
 	opt.set_xtol_rel(1e-4);
 
-	CumulativeHistogram result(atoi(argv[4]));
+	CumulativeHistogram result(atof(argv[4]));
 
 	long long int steps = atol(argv[5]);
 	for(int i = 0; i < steps; i++) {

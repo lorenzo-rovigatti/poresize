@@ -12,7 +12,7 @@
 
 class CumulativeHistogram {
 public:
-	CumulativeHistogram(int n_bins);
+	CumulativeHistogram(double bin_size);
 	virtual ~CumulativeHistogram();
 
 	void add_point(double np);
@@ -22,7 +22,7 @@ protected:
 	std::vector<double> _points;
 	double _min;
 	double _max;
-	int _n_bins;
+	double _bin_size;
 };
 
 #endif /* SRC_CUMULATIVEHISTOGRAM_H_ */

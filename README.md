@@ -31,7 +31,7 @@ Here is a list of options that can be passed to cmake during the pre-compilation
 ## Usage
 
 ```
-poresize input_file input_file_type=oxDNA|LAMMPS r_cut histogram_bins steps
+poresize input_file input_file_type=oxDNA|LAMMPS r_cut histogram_bin_size steps
 ```
 
 poresize requires 5 arguments:
@@ -39,5 +39,5 @@ poresize requires 5 arguments:
 1. The configuration file.
 2. The type of configuration file. Only `LAMMPS` and `oxDNA` are supported.
 3. The size of the cells. The number of cells should be odd, and the code supports non-cubic boxes. As a result, the real size of the cells will be different from the one given, which is used only as a starting point. Tests have shown that, under normal circumstances, a value of 1 or 2 gives optimal results (performance wise). 
-4. The number of bins of the cumulative histogram that is the output of the program.
+4. The size of the bins of the cumulative histogram that is the output of the program.
 5. The number of attempts at computing the radius of the largest sphere that contain a given point and does not overlap with any particle.
