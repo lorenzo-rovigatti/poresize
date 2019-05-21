@@ -147,7 +147,7 @@ void System::_init_cells() {
 			N_cells_side[i] = 3;
 		}
 	}
-	int N_cells = N_cells_side[0] * N_cells_side[1] * N_cells_side[3];
+	int N_cells = N_cells_side[0] * N_cells_side[1] * N_cells_side[2];
 	next.resize(particles.size(), -1);
 	heads.resize(N_cells, -1);
 
