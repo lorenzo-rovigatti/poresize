@@ -20,8 +20,11 @@ using vector_vec3 = std::vector<vec3>;
 
 class System {
 public:
-	System(char *filename, double rc);
+	System(double rc);
 	virtual ~System();
+
+	void init_from_LAMMPS(char *filename);
+	void init_from_oxDNA(char *filename);
 
 	int get_cell_index(const vec3 &pos) const;
 	glm::ivec3 get_cell(const vec3 &pos) const;
@@ -33,7 +36,6 @@ public:
 	glm::ivec3 N_cells_side;
 	std::vector<int> next;
 	std::vector<int> heads;
-//	std::vector<glm::ivec3> cell_shifts;
 	std::vector<std::vector<ivec3>> cell_shifts;
 
 protected:

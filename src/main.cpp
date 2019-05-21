@@ -9,6 +9,8 @@
 
 #include <nlopt.hpp>
 
+#include <algorithm>
+#include <random>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
@@ -51,8 +53,6 @@ double radius(System &syst, const vec3 &centre) {
 		}
 	}
 
-	std::cout << centre[0] << " " << centre[1] << " " << centre[2] << " " << sqrt(R_sqr) << std::endl;
-
 	return sqrt(R_sqr);
 }
 
@@ -82,19 +82,12 @@ double constraint(unsigned n, const double *x, double *grad, void *data) {
 	return sqrt(glm::dot(distance, distance)) - R;
 }
 
-double find_maximum_radius(System &syst, const vec3 &position) {
-	nlopt::opt opt(nlopt::LN_COBYLA, 3);
-	std::vector<double> lower_bounds({0., 0., 0.});
-	std::vector<double> upper_bounds({syst.box[0], syst.box[1], syst.box[2]});
-	opt.set_lower_bounds(lower_bounds);
-	opt.set_upper_bounds(upper_bounds);
-	opt.set_max_objective(function_to_maximise, (void *) &syst);
-	opt.set_xtol_rel(1e-8);
-
+double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) {
 	constraint_data data;
 	data.syst = &syst;
 	data.position = (vec3 *) &position;
 
+	opt.remove_inequality_constraints();
 	opt.add_inequality_constraint(constraint, &data, 1e-8);
 
 	std::vector<double> starting_position({position[0], position[1], position[2]});
@@ -112,13 +105,49 @@ double find_maximum_radius(System &syst, const vec3 &position) {
 }
 
 int main(int argc, char *argv[]) {
-	if(argc < 3) {
-		std::cerr << "Usage is " << argv[0] << " input_file r_cut" << std::endl;
+	if(argc < 5) {
+		std::cerr << "Usage is " << argv[0] << " input_file input_file_type=oxDNA|LAMMPS r_cut steps" << std::endl;
 		exit(1);
 	}
 
-	System syst(argv[1], atof(argv[2]));
-	std::cout << find_maximum_radius(syst, vec3(5., 5., 0.)) << std::endl;
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_real_distribution<double> uniform(0., 1.);
+
+	std::string input_type(argv[2]);
+	std::transform(input_type.begin(), input_type.end(), input_type.begin(), ::toupper);
+
+	// initialise the system
+	System syst(atof(argv[3]));
+	if(input_type == "LAMMPS") {
+		syst.init_from_LAMMPS(argv[1]);
+	}
+	else if(input_type == "OXDNA") {
+		syst.init_from_oxDNA(argv[1]);
+	}
+	else {
+		std::cerr << "Invalid input_file_type '" << argv[2] << "', only LAMMPS and oxDNA supported" << std::endl;
+		exit(1);
+	}
+
+	// initialise the optimisation machinery
+	nlopt::opt opt(nlopt::LN_COBYLA, 3);
+	// we restrict the solver to the region of space comprised between 0 and the box size
+	std::vector<double> lower_bounds({0., 0., 0.});
+	std::vector<double> upper_bounds({syst.box[0], syst.box[1], syst.box[2]});
+	opt.set_lower_bounds(lower_bounds);
+	opt.set_upper_bounds(upper_bounds);
+	opt.set_max_objective(function_to_maximise, (void *) &syst);
+	opt.set_xtol_rel(1e-8);
+
+	long long int steps = atol(argv[4]);
+	for(int i = 0; i < steps; i++) {
+		if(i > 0 && (i % (steps / 10) == 0)) {
+			std::cerr << i << " steps completed" << std::endl;
+		}
+		vec3 random_position(uniform(rng) * syst.box[0], uniform(rng) * syst.box[1], uniform(rng) * syst.box[2]);
+		std::cout << find_maximum_radius(syst, opt, random_position) << std::endl;
+	}
 
 	return 0;
 }
