@@ -100,6 +100,10 @@ double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) 
 
 	try {
 	    nlopt::result result = opt.optimize(starting_position, maximum_radius);
+	    if(result == nlopt::MAXTIME_REACHED) {
+	    	std::cerr << "WARNING: maxtime reached, skipping this attempt" << std::endl;
+	    	return 0.;
+	    }
 	}
 	catch(std::exception &e) {
 	    std::cerr << "nlopt failed: " << e.what() << std::endl;
@@ -145,6 +149,7 @@ int main(int argc, char *argv[]) {
 	opt.set_upper_bounds(upper_bounds);
 	opt.set_max_objective(function_to_maximise, (void *) &syst);
 	opt.set_xtol_rel(1e-4);
+	opt.set_maxtime(1.);
 
 	CumulativeHistogram result(atof(argv[4]));
 
