@@ -30,6 +30,7 @@ void CumulativeHistogram::add_point(double np) {
 
 void CumulativeHistogram::print_out() {
 	int n_bins = ceil((_max - _min) / _bin_size);
+	_bin_size = (_max - _min) / n_bins;
 	std::vector<int> histogram(n_bins, 0);
 
 	for(auto point : _points) {

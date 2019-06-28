@@ -19,6 +19,7 @@
 // this is the function that calculates the radius of the largest sphere centred in "centre" that does not overlap with any of the particles
 double radius(System &syst, const vec3 &centre) {
 	ivec3 centre_cell = syst.get_cell(centre);
+	int centre_cell_idx = centre_cell[0] + syst.N_cells_side[0] * (centre_cell[1] + centre_cell[2] * syst.N_cells_side[1]);
 
 	bool done = false;
 	double R_sqr = -1;
@@ -37,7 +38,6 @@ double radius(System &syst, const vec3 &centre) {
 			cell[1] = (cell[1] + syst.N_cells_side[1]) % syst.N_cells_side[1];
 			cell[2] = (cell[2] + syst.N_cells_side[2]) % syst.N_cells_side[2];
 			int cell_idx = cell[0] + syst.N_cells_side[0] * (cell[1] + cell[2] * syst.N_cells_side[1]);
-			int centre_cell_idx = centre_cell[0] + syst.N_cells_side[0] * (centre_cell[1] + centre_cell[2] * syst.N_cells_side[1]);
 
 			int current = syst.heads[cell_idx];
 			while(current != -1) {
@@ -107,7 +107,7 @@ double find_maximum_radius(System &syst, nlopt::opt &opt, const vec3 &position) 
 	}
 	catch(std::exception &e) {
 	    std::cerr << "nlopt failed: " << e.what() << std::endl;
-	    exit(1);
+	    return 0.;
 	}
 
 	return maximum_radius;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 
 	std::random_device dev;
 	// deterministic runs for debugging purposes, use dev() to "randomly" initialise the rng
-	std::mt19937 rng(12345);
+	std::mt19937 rng(dev());
 	std::uniform_real_distribution<double> uniform(0., 1.);
 
 	std::string input_type(argv[2]);
@@ -140,20 +140,29 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	// initialise the optimisation machinery
-	nlopt::opt opt(nlopt::LN_COBYLA, 3);
+	std::cerr << "Box: " << syst.box[0] << " " << syst.box[1] << " " << syst.box[2] << std::endl;
+
+	// initialise the optimisation machinery. This is the local solver used by the augmented Lagrangian method (https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/#augmented-lagrangian-algorithm)
+	nlopt::opt local_opt(nlopt::LN_SBPLX, 3);
+	local_opt.set_xtol_rel(1e-6);
+	local_opt.set_maxtime(1.);
+
+	nlopt::opt opt(nlopt::LN_AUGLAG, 3);
+	opt.set_local_optimizer(local_opt);
+
 	// we restrict the solver to the region of space comprised between 0 and the box size
 	std::vector<double> lower_bounds({0., 0., 0.});
 	std::vector<double> upper_bounds({syst.box[0], syst.box[1], syst.box[2]});
 	opt.set_lower_bounds(lower_bounds);
 	opt.set_upper_bounds(upper_bounds);
 	opt.set_max_objective(function_to_maximise, (void *) &syst);
-	opt.set_xtol_rel(1e-4);
+	opt.set_xtol_rel(1e-6);
 	opt.set_maxtime(1.);
 
 	CumulativeHistogram result(atof(argv[4]));
 
 	long long int steps = atol(argv[5]);
+	long long int successes = 0;
 	for(int i = 0; i < steps; i++) {
 		if(i > 0 && (i % (steps / 10) == 0)) {
 			std::cerr << i << " steps completed" << std::endl;
@@ -165,11 +174,14 @@ int main(int argc, char *argv[]) {
 			double maximum_R = find_maximum_radius(syst, opt, random_position);
 			if(maximum_R > 0.) {
 				result.add_point(maximum_R);
+				successes++;
 			}
 		}
 	}
 
 	result.print_out();
+
+	std::cerr << "Number of successful attempts: " << successes << "/" << steps << std::endl;
 
 	return 0;
 }
