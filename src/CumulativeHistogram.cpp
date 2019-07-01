@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 CumulativeHistogram::CumulativeHistogram(double bin_size) :
 				_min(0.),
@@ -28,7 +29,9 @@ void CumulativeHistogram::add_point(double np) {
 	}
 }
 
-void CumulativeHistogram::print_out() {
+void CumulativeHistogram::print_out(std::string filename) {
+	std::ofstream output(filename);
+
 	int n_bins = ceil((_max - _min) / _bin_size);
 	_bin_size = (_max - _min) / n_bins;
 	std::vector<int> histogram(n_bins, 0);
@@ -42,6 +45,8 @@ void CumulativeHistogram::print_out() {
 
 	for(int i = 0; i < n_bins; i++) {
 		double bin = _min + _bin_size * (i + 0.5);
-		std::cout << bin << " " << histogram[i] / (double) histogram[0] << std::endl;
+		output << bin << " " << histogram[i] / (double) histogram[0] << std::endl;
 	}
+
+	output.close();
 }

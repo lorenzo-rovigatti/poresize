@@ -9,6 +9,7 @@
 #define SRC_CUMULATIVEHISTOGRAM_H_
 
 #include <vector>
+#include <string>
 
 class CumulativeHistogram {
 public:
@@ -16,7 +17,7 @@ public:
 	virtual ~CumulativeHistogram();
 
 	void add_point(double np);
-	void print_out();
+	void print_out(std::string filename);
 
 protected:
 	std::vector<double> _points;

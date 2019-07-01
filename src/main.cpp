@@ -173,13 +173,14 @@ int main(int argc, char *argv[]) {
 		if(radius(syst, random_position) > 0.) {
 			double maximum_R = find_maximum_radius(syst, opt, random_position);
 			if(maximum_R > 0.) {
+				std::cout << maximum_R << std::endl;
 				result.add_point(maximum_R);
 				successes++;
 			}
 		}
 	}
 
-	result.print_out();
+	result.print_out("last_histo.dat");
 
 	std::cerr << "Number of successful attempts: " << successes << "/" << steps << std::endl;
 
